@@ -1,3 +1,4 @@
 {
-    "data_path": "./data"
+    "data_path": "./data",
+    "timeout": 2
 }
