@@ -10,19 +10,22 @@ from time import time
 import os
 from tqdm import tqdm
 
-with open('scraping_config.json') as json_file:
+with open('config.json') as json_file:
     config = json.load(json_file)
 
 with open(config["fonts_file"]) as json_file:
     fonts = json.load(json_file)
 
 gen = DocumentGenerator()
-if not config["chromedriver_path"]:
+if not "chromedriver_path" in config:
     driver = webdriver.Chrome()
 else:
     driver = webdriver.Chrome(config["chromedriver_path"])
 
 css_selector = '.variant__font-render'
+
+if not os.path.exists(config['data_path']):
+    os.mkdir(config['data_path'])
 
 for font in tqdm(fonts):
     folder_path = f"{config['data_path']}/{font}"
