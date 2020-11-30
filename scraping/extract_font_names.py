@@ -24,7 +24,7 @@ def extract_font_names(n_fonts):
 
     driver.close()
 
-    with open(f'fonts_{n_fonts}.json', 'w') as f:
+    with open(f'../font_names/fonts_{n_fonts}.json', 'w') as f:
         json.dump(list(fonts)[:n_fonts], f, indent=4)
 
 if __name__ == "__main__":
