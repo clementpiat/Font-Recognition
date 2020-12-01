@@ -1,5 +1,9 @@
 /scraping/config.json
 
+# python
+__pycache__
+.ipynb_checkpoints
+
 # IDE
 .vscode/
 
@@ -24,5 +28,4 @@ yarn-debug.log*
 yarn-error.log*
 
 /data/10_fonts_100_sentences
-
-/.ipynb_checkpoints
+/data/10_fonts_2_sentences

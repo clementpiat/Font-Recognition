@@ -56,6 +56,7 @@ for font in tqdm(fonts):
                 if style in styles:
                     style_index = styles.index(style)
                 else:
+                    print("Style not found")
                     break
 
                 element = driver.find_elements_by_css_selector(font_selector)[style_index]
