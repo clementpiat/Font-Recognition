@@ -24,3 +24,5 @@ yarn-debug.log*
 yarn-error.log*
 
 /data/10_fonts_100_sentences
+
+/.ipynb_checkpoints

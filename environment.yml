@@ -24,3 +24,9 @@ dependencies:
   - zlib=1.2.11=h7b6447c_3
   - pip:
     - essential-generators==0.9.2
+    - pillow==8.0.1
+    - selenium==3.141.0
+    - tqdm==4.54.0
+    - urllib3==1.26.2
+prefix: /home/rockl33/anaconda3/envs/font-recognition
+
