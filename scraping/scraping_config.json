@@ -1,7 +1,0 @@
-{
-    "data_path": "../data/10_fonts_100_sentences",
-    "timeout": 2.5,
-    "number_of_sentences_per_font": 100,
-    "fonts_file": "../font_names/fonts_10.json",
-    "chromedriver_path": "/home/rockl33/Code/chromedriver"
-}
