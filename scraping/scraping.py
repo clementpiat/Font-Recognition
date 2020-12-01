@@ -24,7 +24,7 @@ else:
 
 font_selector = '.variant__font-render'
 style_selector = '.variant__style'
-style = 'Regular 400'
+style = config["style"]
 sleep_time = 0.5 # Time of sleeping between scrolling and screenshot (in seconds).
 
 if not os.path.exists(config['data_path']):
