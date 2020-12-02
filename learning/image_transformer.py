@@ -1,5 +1,6 @@
 from PIL import Image  
 import random as rd
+import numpy as np
 
 class ImageTransformer():
     def __init__(self, width=512, height=64, random_state=0, translation_ratio=0.05):
@@ -43,4 +44,4 @@ class ImageTransformer():
         background = Image.new('RGBA', (self.width, self.height) , (255, 255, 255, 255))
         offset = (int(self.translation_x), int(self.translation_y))
         background.paste(img, offset)
-        return background
+        return np.array(background)
