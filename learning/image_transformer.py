@@ -41,7 +41,7 @@ class ImageTransformer():
         img = img.resize(new_shape)
 
         # Place it somewhere in a bigger white image
-        background = Image.new('RGBA', (self.width, self.height) , (255, 255, 255, 255))
+        background = Image.new('L', (self.width, self.height) , 255)
         offset = (int(self.translation_x), int(self.translation_y))
         background.paste(img, offset)
-        return np.array(background)
+        return np.array(background)[np.newaxis,:,:]
