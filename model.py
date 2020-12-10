@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class Model(nn.Module):
-    def __init__(self, width, height):
+    def __init__(self, width, height, use_cosine_similiarity=True):
         super(Model, self).__init__()
         
         self.conv_width = width // 4 - 3
@@ -27,9 +27,15 @@ class Model(nn.Module):
             nn.Sigmoid()
         )
 
+        self.use_cosine_similiarity = use_cosine_similiarity
+        self.cos = nn.CosineSimilarity(dim=1, eps=1e-6)
+
     def forward_one(self, x):
         return torch.flatten(self.conv(x), start_dim=1)
     
     def forward(self, x1, x2):
+        if self.use_cosine_similiarity:
+            return self.cos(self.forward_one(x1), self.forward_one(x2))
+
         out = torch.cat((self.forward_one(x1), self.forward_one(x2)), dim=1)
         return self.feed_forward(out).squeeze()
