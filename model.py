@@ -35,7 +35,7 @@ class Model(nn.Module):
     
     def forward(self, x1, x2):
         if self.use_cosine_similiarity:
-            return self.cos(self.forward_one(x1), self.forward_one(x2))
+            return (self.cos(self.forward_one(x1), self.forward_one(x2)) + 1)/2
 
         out = torch.cat((self.forward_one(x1), self.forward_one(x2)), dim=1)
         return self.feed_forward(out).squeeze()
