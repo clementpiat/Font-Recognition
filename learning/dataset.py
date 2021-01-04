@@ -30,9 +30,9 @@ class FontDataset(Dataset):
     def __getitem__(self, index):
         if self.siamese:
             index1, index2, label = self.indexes[index]
-            img1 = self.get_img_label(index1)[0]
-            img2 = self.get_img_label(index2)[0]
-            return (img1, img2, label)
+            img1 = self.get_img_label(index1)
+            img2 = self.get_img_label(index2)
+            return (*img1, *img2, label)
         else:
             return self.get_img_label(index)
 
