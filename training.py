@@ -46,6 +46,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     losses = defaultdict(list)
 
     # Train
+    model.train()
     for epoch in range(epochs):
         print(f"Epoch {epoch}")
         running_loss = 0
@@ -77,7 +78,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
         json.dump(losses, f, indent=4)
 
     # Test
-    model.skip_dropout()
+    model.eval()
     predictions, labels, font_pairs = [], [], []
     for data in test_loader:
         img1, label1, img2, label2, label = data
