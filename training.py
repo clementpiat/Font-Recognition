@@ -20,6 +20,9 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     rd.seed(0)
     torch.manual_seed(0)
 
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Device:",device)
+
     dataset = FontDataset(dataset, siamese=True)
 
     train_size = int(train_size * len(dataset))
@@ -34,6 +37,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
         break
 
     model = Model(img1.shape[3], img1.shape[2])
+    model.to(device)
     optimizer = Adam(model.parameters(), lr=1e-3)
 
     def bce_loss(prediction, label):
@@ -48,7 +52,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
         start_time = time.time()
         for i, data in enumerate(train_loader):
             img1, _, img2, _, label = data
-            img1, img2, label = img1.type(torch.FloatTensor), img2.type(torch.FloatTensor), label.type(torch.FloatTensor)
+            img1, img2, label = img1.type(torch.FloatTensor).to(device), img2.type(torch.FloatTensor).to(device), label.type(torch.FloatTensor).to(device)
 
             optimizer.zero_grad()
             
@@ -77,7 +81,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     predictions, labels, font_pairs = [], [], []
     for data in test_loader:
         img1, label1, img2, label2, label = data
-        img1, img2, label = img1.type(torch.FloatTensor), img2.type(torch.FloatTensor), label.type(torch.FloatTensor)
+        img1, img2, label = img1.type(torch.FloatTensor).to(device), img2.type(torch.FloatTensor).to(device), label.type(torch.FloatTensor).to(device)
 
         predictions += model(img1, img2).detach().tolist()
         labels += label.detach().tolist()
