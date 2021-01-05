@@ -32,10 +32,8 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
-    for data in train_loader:
-        img1, _, img2, _, label = data
-        break
-
+    img1, _, img2, _, label = next(iter(train_loader))
+    
     model = Model(img1.shape[3], img1.shape[2])
     model.to(device)
     optimizer = Adam(model.parameters(), lr=1e-3)

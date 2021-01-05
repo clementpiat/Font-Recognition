@@ -12,7 +12,7 @@ class FontDataset(Dataset):
 
         self.dataset_name = dataset_name
         fonts = os.listdir(os.path.join("data", dataset_name))
-        self.font_to_label = dict([[font,i] for i,font in enumerate(fonts)])
+        self.font_to_label = { font: i for i,font in enumerate(fonts) }
         self.filenames = []
         self.fonts = []
         for font in fonts:
@@ -24,7 +24,8 @@ class FontDataset(Dataset):
         
         self.siamese = siamese
         self.k_siamese = k_siamese
-        self.indexes = get_n_pairs(k_siamese*len(self.filenames), self.fonts)
+        if self.siamese:
+            self.indexes = get_n_pairs(k_siamese*len(self.filenames), self.fonts)
         
 
     def __getitem__(self, index):
