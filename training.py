@@ -88,7 +88,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
         font_pairs += [(l1,l2) for l1,l2 in zip(label1.tolist(), label2.tolist())]
 
     with open(os.path.join(path_to_result_folder, "predictions.json"), 'w') as f:
-        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs}, f, indent=4)
+        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": dataset.font_to_label}, f, indent=4)
     print(f"\n> Test accuracy: {1 - np.mean(np.abs(np.array(labels)-np.round(predictions)))}")
 
 if __name__ == "__main__":
