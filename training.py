@@ -73,6 +73,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
         json.dump(losses, f, indent=4)
 
     # Test
+    model.skip_dropout()
     predictions, labels, font_pairs = [], [], []
     for data in test_loader:
         img1, label1, img2, label2, label = data
