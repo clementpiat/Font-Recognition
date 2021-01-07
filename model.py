@@ -20,7 +20,7 @@ class Model(nn.Module):
         )
 
         self.siamese_feed_forward = nn.Sequential(
-            nn.Linear(2*self.d_conv, 512),
+            nn.Linear(self.d_conv, 512),
             nn.Dropout(inplace=True),
             nn.ReLU(inplace=True),
             nn.Linear(512, 64),
