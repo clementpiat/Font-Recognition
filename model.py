@@ -23,8 +23,7 @@ class Model(nn.Module):
             nn.Linear(self.d_conv, 512),
             nn.Dropout(inplace=True),
             nn.ReLU(inplace=True),
-            nn.Linear(512, 128),
-            nn.Sigmoid()
+            nn.Linear(512, 128)
         )
 
         self.feed_forward = nn.Sequential(
