@@ -19,6 +19,14 @@ class Model(nn.Module):
             nn.MaxPool2d(2)
         )
 
+        self.siamese_feed_forward = nn.Sequential(
+            nn.Linear(2*self.d_conv, 512),
+            nn.Dropout(inplace=True),
+            nn.ReLU(inplace=True),
+            nn.Linear(512, 64),
+            nn.ReLU(inplace=True)
+        )
+
         self.feed_forward = nn.Sequential(
             nn.Linear(2*self.d_conv, 512),
             nn.Dropout(inplace=True),
@@ -36,7 +44,9 @@ class Model(nn.Module):
     
     def forward(self, x1, x2):
         if self.use_cosine_similiarity:
-            return (self.cos(self.forward_one(x1), self.forward_one(x2)) + 1)/2
+            y1 = self.siamese_feed_forward(self.forward_one(x1))
+            y2 = self.siamese_feed_forward(self.forward_one(x2))
+            return (self.cos(y1, y2) + 1)/2
 
         out = torch.cat((self.forward_one(x1), self.forward_one(x2)), dim=1)
         return self.feed_forward(out).squeeze()
