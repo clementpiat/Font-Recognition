@@ -12,10 +12,10 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.nn import functional as F
 
-from learning.dataset import FontDataset
+from learning.dataset import FontDataset, get_train_test_dataset
 from model import Model
 
-def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
+def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate):
     np.random.seed(0)
     rd.seed(0)
     torch.manual_seed(0)
@@ -23,11 +23,12 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("Device:",device)
 
-    dataset = FontDataset(dataset, siamese=True)
+    # dataset = FontDataset(dataset, siamese=True)
+    # train_size = int(train_size * len(dataset))
+    # test_size = len(dataset) - train_size
+    # train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
 
-    train_size = int(train_size * len(dataset))
-    test_size = len(dataset) - train_size
-    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
+    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, siamese=True, n_transformations=n_transformations)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -36,7 +37,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     
     model = Model(img1.shape[3], img1.shape[2])
     model.to(device)
-    optimizer = Adam(model.parameters(), lr=1e-3)
+    optimizer = Adam(model.parameters(), lr=learning_rate)
 
     def bce_loss(prediction, label):
         return F.binary_cross_entropy(prediction, label, reduction="sum")
@@ -47,7 +48,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     model.train()
     for epoch in range(epochs):
         print(f"Epoch {epoch}")
-        running_loss = 0
+        running_loss, epoch_loss = 0,0
         start_time = time.time()
         for i, data in enumerate(train_loader):
             img1, _, img2, _, label = data
@@ -60,6 +61,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
 
             loss.backward()
             running_loss += loss.item()
+            epoch_loss += loss.item()
             optimizer.step()
             losses[epoch].append(loss.item())
 
@@ -67,6 +69,9 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
                 print(f"  [{i+1:4d}] loss: {running_loss/print_every_k_batches:.3f}    ({round(time.time() - start_time, 3)} s)")
                 running_loss = 0.0
                 start_time = time.time()
+        
+        print('> Epoch: {}  -  Global average loss: {:.4f}\n'.format(
+            epoch, epoch_loss / len(train_loader.dataset)))
 
     path_to_result_folder = os.path.join('results', str(time.time()))
     os.mkdir(path_to_result_folder)
@@ -87,13 +92,13 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
         font_pairs += [(l1,l2) for l1,l2 in zip(label1.tolist(), label2.tolist())]
 
     with open(os.path.join(path_to_result_folder, "predictions.json"), 'w') as f:
-        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": dataset.font_to_label}, f, indent=4)
+        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": train_dataset.font_to_label}, f, indent=4)
     print(f"\n> Test accuracy: {1 - np.mean(np.abs(np.array(labels)-np.round(predictions)))}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--batch_size", type=int, default=64, 
-        help="dataset batch size")
+        help="dataset batch Epochssize")
     parser.add_argument("-e", "--epochs", type=int, default=2, 
         help="number of epochs")
     parser.add_argument("-pkb", "--print_every_k_batches", type=int, default=2, 
@@ -102,7 +107,11 @@ if __name__ == "__main__":
         help="dataset train size")
     parser.add_argument("-d", "--dataset", type=str, default="example", 
         help="dataset name in the data folder")
+    parser.add_argument("-nt", "--n_transformations", type=int, default=2, 
+        help="roughly the number of transformations per image")
+    parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3, 
+        help="training learning rate")
     args = parser.parse_args()
     print(f"\n> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
     
-    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches)
+    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches, args.n_transformations, args.learning_rate)
