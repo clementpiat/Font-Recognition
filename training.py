@@ -40,7 +40,9 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_trans
     optimizer = Adam(model.parameters(), lr=learning_rate)
 
     def bce_loss(prediction, label):
-        return F.binary_cross_entropy(prediction, label, reduction="sum")
+        # return F.binary_cross_entropy(prediction, label, reduction="sum")
+        return ((prediction - label)**2).mean()
+        
 
     losses = defaultdict(list)
 
