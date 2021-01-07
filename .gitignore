@@ -3,6 +3,9 @@
 /results/*
 !results/.gitkeep
 
+/data/*
+!/data/example
+
 # python
 __pycache__
 .ipynb_checkpoints
@@ -29,6 +32,3 @@ __pycache__
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-/data/10_fonts_100_sentences
-/data/10_fonts_2_sentences
