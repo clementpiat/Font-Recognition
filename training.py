@@ -28,12 +28,13 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_trans
     # test_size = len(dataset) - train_size
     # train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
 
-    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, siamese=True, n_transformations=n_transformations)
+    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, n_transformations, siamese=True)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
     img1, _, img2, _, label = next(iter(train_loader))
+
     
     model = Model(img1.shape[3], img1.shape[2])
     model.to(device)

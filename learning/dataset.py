@@ -7,11 +7,11 @@ from .image_transformer import ImageTransformer
 
 
 class FontDataset(Dataset):
-    def __init__(self, dataset_name, font_to_filenames, siamese=False, n_transformations=2, random_state=0, width=512, height=64, translation_ratio=0.05):
+    def __init__(self, dataset_name, font_to_label, font_to_filenames, it, n_transformations, siamese=False):
         super(FontDataset, self).__init__()
        
         self.dataset_name = dataset_name
-        self.font_to_label = { font: i for i,font in enumerate(font_to_filenames) }
+        self.font_to_label = font_to_label
         self.filenames, self.fonts, self.font_to_indexes = [], [], {}
         i = 0
         for font,filenames in font_to_filenames.items():
@@ -23,8 +23,8 @@ class FontDataset(Dataset):
             i += n
 
         self.n_filenames = i
-        self.it =  ImageTransformer(random_state=random_state, width=width, height=height, translation_ratio=translation_ratio)
         self.siamese = siamese
+        self.it =  it
         self.n_transformations = n_transformations
 
     
@@ -52,24 +52,25 @@ class FontDataset(Dataset):
         return self.n_transformations * self.n_filenames
 
     def get_img_label(self, index):
-        filename = os.path.join("data", self.dataset_name, self.fonts[index], self.filenames[index])
-        img = self.it.sentence_to_image(filename)
+        return (self.it(self.filenames[index]), self.font_to_label[self.fonts[index]])
 
-        return (img, self.font_to_label[self.fonts[index]])
-
-def get_train_test_dataset(dataset_name, train_size, siamese=False, n_transformations=2, random_state=0, width=512, height=64, translation_ratio=0.05):
+def get_train_test_dataset(dataset_name, train_size, n_transformations, siamese=False, random_state=0, width=512, max_height_ratio=0.4, max_width_ratio=0.15):
     fonts = os.listdir(os.path.join("data", dataset_name))
-    font_to_filenames_train, font_to_filenames_test = {}, {}
+    font_to_filenames_train, font_to_filenames_test, paths_filenames = {}, {}, []
     for font in fonts:
-        filenames = os.listdir(os.path.join("data", dataset_name, font))
+        font_path = os.path.join("data", dataset_name, font)
+        filenames = os.listdir(font_path)
+        paths_filenames += [(os.path.join(font_path, filename), filename) for filename in filenames]
         n = int(len(filenames)*train_size)
 
-        random.shuffle(filenames) # Not necessary
         font_to_filenames_train[font] = filenames[:n]
         font_to_filenames_test[font] = filenames[n:]
+
+    font_to_label = { font: i for i,font in enumerate(font_to_filenames_train) }
+
+    it = ImageTransformer(random_state=random_state, width=width, max_width_ratio=max_width_ratio, max_height_ratio=max_height_ratio)
+    it.load_and_crop(paths_filenames)
     
-    train_dataset = FontDataset(dataset_name, font_to_filenames_train, siamese=siamese, n_transformations=n_transformations, 
-        random_state=random_state, width=width, height=height, translation_ratio=translation_ratio)
-    test_dataset = FontDataset(dataset_name, font_to_filenames_test, siamese=siamese, n_transformations=n_transformations, 
-        random_state=random_state, width=width, height=height, translation_ratio=translation_ratio)
+    train_dataset = FontDataset(dataset_name, font_to_label, font_to_filenames_train, it, n_transformations, siamese=siamese)
+    test_dataset = FontDataset(dataset_name, font_to_label, font_to_filenames_test, it, n_transformations, siamese=siamese)
     return train_dataset, test_dataset

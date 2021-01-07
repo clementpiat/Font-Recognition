@@ -3,45 +3,50 @@ import random as rd
 import numpy as np
 
 class ImageTransformer():
-    def __init__(self, width=512, height=64, random_state=0, translation_ratio=0.05):
-        """
-        square_dim: dimension of the final square image (number of pixels)
-        """
-        self.width = width
-        self.height = height
-        self.random_state = random_state
+    def __init__(self, width, max_height_ratio=0.4, max_width_ratio=0.15, random_state=0):
+        self.w = width
+        self.max_height_ratio = max_height_ratio
+        self.max_width_ratio = max_width_ratio
         rd.seed(random_state)
-        self.translation_ratio = translation_ratio
+        
+    def find_coeffs(self, pa, pb):
+        matrix = []
+        for p1, p2 in zip(pa, pb):
+            matrix.append([p1[0], p1[1], 1, 0, 0, 0, -p2[0]*p1[0], -p2[0]*p1[1]])
+            matrix.append([0, 0, 0, p1[0], p1[1], 1, -p2[1]*p1[0], -p2[1]*p1[1]])
 
-    def set_random_transformation_parameters(self):
-        """
-        angle: angle of rotation of the sentence (degrees)
-        size: proportion of the text in the final image (float between 0.5 and 1)
-        proportion_w, proportion_h: location of the text in the final image (couple of floats between 0 and 1)
-        """
-        self.angle = rd.randint(-2,2)
-        self.resize_factor = rd.uniform(0.8,1.2)
-        self.translation_x = rd.random()*self.width*self.translation_ratio
-        self.translation_y = rd.random()*self.height*self.translation_ratio
+        A = np.matrix(matrix, dtype=np.float)
+        B = np.array(pb).reshape(8)
 
-    def sentence_to_image(self, path_to_sentence):
-        """
-        Being given the path to a font image returns a rotated, shifted and resized image
-        """
-        self.set_random_transformation_parameters()
+        res = np.dot(np.linalg.inv(A.T * A) * A.T, B)
+        return np.array(res).reshape(8)
 
-        img = Image.open(path_to_sentence, 'r')
+    def load_and_crop(self, paths_filenames):
+        self.images = {}
+        for path, filename in paths_filenames:
+            img = Image.open(path)
+            self.h = img.size[1]
+            self.images[filename] = img.crop((0, 0, self.w, self.h))
+        
+    def transform(self, img):
+        side = rd.randint(1,4)
+        
+        if side % 2 == 0:
+            perspective_delta = self.h*self.max_height_ratio*rd.random()**2
+            start_h = perspective_delta*rd.random()
+            if side == 2:
+                pa = [(0, 0), (0, self.h), (self.w, start_h), (self.w, start_h + self.h - perspective_delta)]
+            else:
+                pa = [(0, start_h), (0, start_h + self.h - perspective_delta), (self.w, 0), (self.w, self.h)]
+        else:
+            perspective_delta = self.w*self.max_width_ratio*rd.random()**2
+            start_w = perspective_delta*rd.random()
+            if side == 1:
+                pa = [(start_w, 0), (0, self.h), (start_w + self.w - perspective_delta, 0), (self.w, self.h)]
+            else:
+                pa = [(0, 0), (start_w, self.h), (self.w, 0), (start_w + self.w - perspective_delta, self.h)]
+        coeffs = self.find_coeffs(pa, [(0, 0), (0, self.h), (self.w, 0), (self.w, self.h)])
+        return np.array(img.transform((self.w, self.h), Image.PERSPECTIVE, coeffs, Image.BICUBIC))
 
-        # Rotate
-        img = img.rotate(self.angle, expand=True, fillcolor='white')
-
-        # Resize
-        img_w, img_h = img.size
-        new_shape = int(img_w*self.resize_factor), int(img_h*self.resize_factor)
-        img = img.resize(new_shape)
-
-        # Place it somewhere in a bigger white image
-        background = Image.new('L', (self.width, self.height) , 255)
-        offset = (int(self.translation_x), int(self.translation_y))
-        background.paste(img, offset)
-        return np.array(background)[np.newaxis,:,:]
+    def __call__(self, filename):
+        return self.transform(self.images[filename])[np.newaxis,:,:]
