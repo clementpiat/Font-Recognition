@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from torch.optim import Adam
 from torch.nn import functional as F
 
-from learning.dataset import FontDataset
+from learning.dataset import FontDataset, get_train_test_dataset
 from model import Model
 
 def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
@@ -23,11 +23,12 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("Device:",device)
 
-    dataset = FontDataset(dataset, siamese=True)
+    # dataset = FontDataset(dataset, siamese=True)
+    # train_size = int(train_size * len(dataset))
+    # test_size = len(dataset) - train_size
+    # train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
 
-    train_size = int(train_size * len(dataset))
-    test_size = len(dataset) - train_size
-    train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
+    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, siamese=True, n_transformations=2)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -87,7 +88,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
         font_pairs += [(l1,l2) for l1,l2 in zip(label1.tolist(), label2.tolist())]
 
     with open(os.path.join(path_to_result_folder, "predictions.json"), 'w') as f:
-        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": dataset.font_to_label}, f, indent=4)
+        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": train_dataset.font_to_label}, f, indent=4)
     print(f"\n> Test accuracy: {1 - np.mean(np.abs(np.array(labels)-np.round(predictions)))}")
 
 if __name__ == "__main__":
