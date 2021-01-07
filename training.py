@@ -48,7 +48,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_trans
     model.train()
     for epoch in range(epochs):
         print(f"Epoch {epoch}")
-        running_loss = 0
+        running_loss, epoch_loss = 0,0
         start_time = time.time()
         for i, data in enumerate(train_loader):
             img1, _, img2, _, label = data
@@ -61,6 +61,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_trans
 
             loss.backward()
             running_loss += loss.item()
+            epoch_loss += loss.item()
             optimizer.step()
             losses[epoch].append(loss.item())
 
@@ -68,6 +69,9 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_trans
                 print(f"  [{i+1:4d}] loss: {running_loss/print_every_k_batches:.3f}    ({round(time.time() - start_time, 3)} s)")
                 running_loss = 0.0
                 start_time = time.time()
+        
+        print('> Epoch: {}  -  Global average loss: {:.4f}\n'.format(
+            epoch, epoch_loss / len(train_loader.dataset)))
 
     path_to_result_folder = os.path.join('results', str(time.time()))
     os.mkdir(path_to_result_folder)
