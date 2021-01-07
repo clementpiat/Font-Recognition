@@ -15,7 +15,7 @@ from torch.nn import functional as F
 from learning.dataset import FontDataset, get_train_test_dataset
 from model import Model
 
-def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
+def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations):
     np.random.seed(0)
     rd.seed(0)
     torch.manual_seed(0)
@@ -28,7 +28,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
     # test_size = len(dataset) - train_size
     # train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
 
-    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, siamese=True, n_transformations=2)
+    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, siamese=True, n_transformations=n_transformations)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -94,7 +94,7 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", "--batch_size", type=int, default=64, 
-        help="dataset batch size")
+        help="dataset batch Epochssize")
     parser.add_argument("-e", "--epochs", type=int, default=2, 
         help="number of epochs")
     parser.add_argument("-pkb", "--print_every_k_batches", type=int, default=2, 
@@ -103,7 +103,9 @@ if __name__ == "__main__":
         help="dataset train size")
     parser.add_argument("-d", "--dataset", type=str, default="example", 
         help="dataset name in the data folder")
+    parser.add_argument("-nt", "--n_transformations", type=int, default=2, 
+        help="roughly the number of transformations per image")
     args = parser.parse_args()
     print(f"\n> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
     
-    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches)
+    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches, args.n_transformations)
