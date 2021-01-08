@@ -2,12 +2,13 @@ import torch
 import torch.nn as nn
 
 def init_weights(m):
-    if type(m) == nn.Linear:
+    if type(m) == nn.Linear or type(m) == nn.Conv2d:
         torch.nn.init.xavier_uniform_(m.weight)
-        m.bias.data.fill_(0.01)
+        if m.bias is not None:
+            torch.nn.init.zeros_(m.bias)
 
 class Model(nn.Module):
-    def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=1):
+    def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=0):
         super(Model, self).__init__()
         
         self.conv = nn.Sequential(
@@ -21,6 +22,7 @@ class Model(nn.Module):
             nn.Conv2d(64,64,3),
             nn.MaxPool2d(max_pooling[3])
         )
+        self.conv.apply(init_weights)
 
         self.d_conv = torch.flatten(self.conv(torch.zeros(1,1,height,width))).size()[0]
 
