@@ -1,6 +1,11 @@
 import torch
 import torch.nn as nn
 
+def init_weights(m):
+    if type(m) == nn.Linear:
+        torch.nn.init.xavier_uniform_(m.weight)
+        m.bias.data.fill_(0.01)
+
 class Model(nn.Module):
     def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=1):
         super(Model, self).__init__()
@@ -26,6 +31,7 @@ class Model(nn.Module):
             nn.Linear(512, 64),
             nn.Sigmoid()
         )
+        self.siamese_feed_forward.apply(init_weights)
 
         self.feed_forward = nn.Sequential(
             nn.Linear(2*self.d_conv, 512),
@@ -34,6 +40,7 @@ class Model(nn.Module):
             nn.Linear(512, 1),
             nn.Sigmoid()
         )
+        self.feed_forward.apply(init_weights)
 
         self.mode = mode
         self.cos = nn.CosineSimilarity(dim=1, eps=1e-6)
