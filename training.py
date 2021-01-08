@@ -73,7 +73,10 @@ def train_and_eval(width, height, device, learning_rate, epochs, train_loader, t
 
     with open(os.path.join(path_to_result_folder, "predictions.json"), 'w') as f:
         json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": font_to_label}, f, indent=4)
-    print(f"\n> Test accuracy: {1 - np.mean(np.abs(np.array(labels)-np.round(predictions)))}")
+
+    accuracy = 1 - np.mean(np.abs(np.array(labels)-np.round(predictions)))
+    print(f"\n> Test accuracy: {accuracy}")
+    return accuracy
 
 def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate):
     np.random.seed(0)
