@@ -9,11 +9,15 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from torch.optim import Adam
+import torch.nn.functional as F
 
 from learning.dataset import get_train_test_dataset
 from model import Model
 
 def bce_loss(prediction, label):
+    return F.binary_cross_entropy(prediction, label, reduction="sum")
+
+def mse_loss(prediction, label):
     return ((prediction - label)**2).mean()
 
 def train_and_eval(width, height, device, learning_rate, epochs, train_loader, test_loader, font_to_label, print_every_k_batches):
