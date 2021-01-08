@@ -1,4 +1,4 @@
-from PIL import Image  
+from PIL import Image, ImageOps
 import random as rd
 import numpy as np
 
@@ -24,7 +24,8 @@ class ImageTransformer():
     def load_and_crop(self, paths_filenames):
         self.images = {}
         for path, filename in paths_filenames:
-            img = Image.open(path)
+            img = Image.open(path).convert('RGB')
+            img = ImageOps.invert(img).convert('L')
             self.h = img.size[1]
             self.images[filename] = img.crop((0, 0, self.w, self.h))
         
