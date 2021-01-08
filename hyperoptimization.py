@@ -28,7 +28,7 @@ def main(dataset, n_trials, print_every_k_batches, train_size):
 
         img1, _, _, _, _ = next(iter(train_loader))
 
-        return train_and_eval(img1.shape[3], img1.shape[2], device, learning_rate, epochs, train_loader, test_loader, train_dataset.font_to_label, print_every_k_batches)
+        return -train_and_eval(img1.shape[3], img1.shape[2], device, learning_rate, epochs, train_loader, test_loader, train_dataset.font_to_label, print_every_k_batches)
 
     study = optuna.create_study()
     study.optimize(objective, n_trials=n_trials)
