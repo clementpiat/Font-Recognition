@@ -8,7 +8,7 @@ def init_weights(m):
             torch.nn.init.zeros_(m.bias)
 
 class Model(nn.Module):
-    def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=1):
+    def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=0):
         super(Model, self).__init__()
         
         self.conv = nn.Sequential(
@@ -52,12 +52,12 @@ class Model(nn.Module):
         return torch.flatten(self.conv(x), start_dim=1)
     
     def forward(self, x1, x2):
-        if self.mode==1:
+        if self.mode==0:
             y1 = self.forward_one(x1)
             y2 = self.forward_one(x2)
             return (self.cos(y1, y2) + 1)/2
 
-        elif self.mode==2:
+        elif self.mode==1:
             y1 = self.siamese_feed_forward(self.forward_one(x1))
             y2 = self.siamese_feed_forward(self.forward_one(x2))
             return self.cos(y1, y2)
