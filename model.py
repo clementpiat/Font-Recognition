@@ -8,7 +8,7 @@ def init_weights(m):
             torch.nn.init.zeros_(m.bias)
 
 class Model(nn.Module):
-    def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=0):
+    def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=1):
         super(Model, self).__init__()
         
         self.conv = nn.Sequential(
