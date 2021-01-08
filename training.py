@@ -1,6 +1,5 @@
 import argparse
 import json
-import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 import time
@@ -10,39 +9,17 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from torch.optim import Adam
-from torch.nn import functional as F
 
-from learning.dataset import FontDataset, get_train_test_dataset
+from learning.dataset import get_train_test_dataset
 from model import Model
 
-def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate):
-    np.random.seed(0)
-    rd.seed(0)
-    torch.manual_seed(0)
+def bce_loss(prediction, label):
+    return ((prediction - label)**2).mean()
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print("Device:",device)
-
-    # dataset = FontDataset(dataset, siamese=True)
-    # train_size = int(train_size * len(dataset))
-    # test_size = len(dataset) - train_size
-    # train_dataset, test_dataset = torch.utils.data.random_split(dataset, [train_size, test_size])
-
-    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, n_transformations, siamese=True)
-
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
-
-    img1, _, img2, _, label = next(iter(train_loader))
-
-    
-    model = Model(img1.shape[3], img1.shape[2])
+def train_and_eval(width, height, device, learning_rate, epochs, train_loader, test_loader, font_to_label, print_every_k_batches):
+    model = Model(width, height)
     model.to(device)
     optimizer = Adam(model.parameters(), lr=learning_rate)
-
-    def bce_loss(prediction, label):
-        # return F.binary_cross_entropy(prediction, label, reduction="sum")
-        return ((prediction - label)**2).mean()
         
 
     losses = defaultdict(list)
@@ -92,11 +69,29 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_trans
 
         predictions += model(img1, img2).detach().tolist()
         labels += label.detach().tolist()
-        font_pairs += [(l1,l2) for l1,l2 in zip(label1.tolist(), label2.tolist())]
+        font_pairs += [(l1,l2) for l1,l2 in zip(label1.detach().tolist(), label2.detach().tolist())]
 
     with open(os.path.join(path_to_result_folder, "predictions.json"), 'w') as f:
-        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": train_dataset.font_to_label}, f, indent=4)
+        json.dump({"predictions": predictions, "labels": labels, "font_pairs": font_pairs, "font_to_label": font_to_label}, f, indent=4)
     print(f"\n> Test accuracy: {1 - np.mean(np.abs(np.array(labels)-np.round(predictions)))}")
+
+def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate):
+    np.random.seed(0)
+    rd.seed(0)
+    torch.manual_seed(0)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Device:",device)
+
+    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, n_transformations, siamese=True)
+
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+    img1, _, _, _, _ = next(iter(train_loader))
+    train_and_eval(img1.shape[3], img1.shape[2], device, learning_rate, epochs, train_loader, test_loader, train_dataset.font_to_label, print_every_k_batches)
+
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
