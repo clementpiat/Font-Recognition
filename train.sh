@@ -7,6 +7,7 @@
 #SBATCH --partition=gpu
 #SBATCH --mem=32gb
 #SBATCH --cpus-per-task=16
+#SBATCH --gres=gpu:1
 
 # To clean and load modules defined at the compile and link phases
 module purge
