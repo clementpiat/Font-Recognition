@@ -20,11 +20,11 @@ class Model(nn.Module):
         )
 
         self.siamese_feed_forward = nn.Sequential(
-            nn.Linear(self.d_conv, 512),
-            # nn.Dropout(inplace=True),
-            # nn.ReLU(inplace=True),
-            # nn.Linear(512, 128),
-            # nn.Sigmoid()
+            nn.Linear(self.d_conv, 2048),
+            nn.Dropout(inplace=True),
+            nn.ReLU(inplace=True),
+            nn.Linear(2048, 256),
+            nn.Sigmoid()
         )
 
         self.feed_forward = nn.Sequential(
