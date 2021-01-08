@@ -63,6 +63,7 @@ def train_and_eval(width, height, device, learning_rate, epochs, train_loader, t
 
     with open(os.path.join(path_to_result_folder, "loss_history.json"), 'w') as f:
         json.dump(losses, f, indent=4)
+    print(f"Saved in folder {path_to_result_folder}")
 
     # Test
     model.eval()
