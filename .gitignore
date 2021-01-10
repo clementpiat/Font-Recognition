@@ -5,6 +5,7 @@
 
 /data/*
 !/data/example
+!/data/nasa
 
 # python
 __pycache__
