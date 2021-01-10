@@ -20,8 +20,8 @@ def bce_loss(prediction, label):
 def mse_loss(prediction, label):
     return ((prediction - label)**2).mean()
 
-def train_and_eval(width, height, device, learning_rate, epochs, train_loader, test_loader, font_to_label, print_every_k_batches):
-    model = Model(width, height)
+def train_and_eval(width, height, device, learning_rate, epochs, train_loader, test_loader, font_to_label, print_every_k_batches, mode):
+    model = Model(width, height, mode=mode)
     model.to(device)
     optimizer = Adam(model.parameters(), lr=learning_rate)
         
@@ -83,7 +83,7 @@ def train_and_eval(width, height, device, learning_rate, epochs, train_loader, t
     print(f"\n> Test accuracy: {accuracy}")
     return accuracy
 
-def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate):
+def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate, mode):
     np.random.seed(0)
     rd.seed(0)
     torch.manual_seed(0)
@@ -97,7 +97,8 @@ def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_trans
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
     img1, _, _, _, _ = next(iter(train_loader))
-    train_and_eval(img1.shape[3], img1.shape[2], device, learning_rate, epochs, train_loader, test_loader, train_dataset.font_to_label, print_every_k_batches)
+    train_and_eval(img1.shape[3], img1.shape[2], device, learning_rate, epochs, train_loader, test_loader, train_dataset.font_to_label, 
+        print_every_k_batches, mode)
 
     
 
@@ -117,7 +118,9 @@ if __name__ == "__main__":
         help="roughly the number of transformations per image")
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3, 
         help="training learning rate")
+    parser.add_argument("-m", "--mode", type=int, default=1, 
+        help="type of model: 0, 1, or 2")
     args = parser.parse_args()
     print(f"\n> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
     
-    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches, args.n_transformations, args.learning_rate)
+    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches, args.n_transformations, args.learning_rate, args.mode)
