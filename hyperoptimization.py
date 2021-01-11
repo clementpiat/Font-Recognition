@@ -8,7 +8,7 @@ from learning.dataset import get_train_test_dataset
 
 from training import train_and_eval
 
-def main(dataset, n_trials, print_every_k_batches, train_size):
+def main(dataset, n_trials, print_every_k_batches, train_size, mode):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("Device:",device)
 
@@ -29,7 +29,7 @@ def main(dataset, n_trials, print_every_k_batches, train_size):
         img1, _, _, _, _ = next(iter(train_loader))
 
         return -train_and_eval(img1.shape[3], img1.shape[2], device, learning_rate, epochs, train_loader, test_loader, train_dataset.font_to_label, 
-            print_every_k_batches,0)
+            print_every_k_batches,mode)
 
     study = optuna.create_study()
     study.optimize(objective, n_trials=n_trials)
@@ -46,7 +46,9 @@ if __name__ == "__main__":
         help="dataset name in the data folder")
     parser.add_argument("-t", "--train_size", type=float, default=0.7, 
         help="dataset train size")
+    parser.add_argument("-m", "--mode", type=int, default=0, 
+        help="type of model: 0, 1, or 2")
     
     args = parser.parse_args()
     print(f"\n> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
-    main(args.dataset, args.n_trials, args.print_every_k_batches, args.train_size)
+    main(args.dataset, args.n_trials, args.print_every_k_batches, args.train_size, args.mode)

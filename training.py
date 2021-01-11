@@ -118,7 +118,7 @@ if __name__ == "__main__":
         help="roughly the number of transformations per image")
     parser.add_argument("-lr", "--learning_rate", type=float, default=1e-3, 
         help="training learning rate")
-    parser.add_argument("-m", "--mode", type=int, default=1, 
+    parser.add_argument("-m", "--mode", type=int, default=0, 
         help="type of model: 0, 1, or 2")
     args = parser.parse_args()
     print(f"\n> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
