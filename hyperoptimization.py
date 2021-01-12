@@ -8,11 +8,11 @@ from learning.dataset import get_train_test_dataset
 
 from training import train_and_eval
 
-def main(dataset, n_trials, print_every_k_batches, train_size, mode):
+def main(dataset, n_trials, print_every_k_batches, train_size, mode, rsr):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("Device:",device)
 
-    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, 0, siamese=True)
+    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, 0, siamese=True, rsr=rsr)
 
     def objective(trial):
         batch_size = trial.suggest_categorical('batch_size', [32, 64, 128])
@@ -48,7 +48,9 @@ if __name__ == "__main__":
         help="dataset train size")
     parser.add_argument("-m", "--mode", type=int, default=0, 
         help="type of model: 0, 1, or 2")
+    parser.add_argument("-rsr", "--rsr", type=bool, default=False, const=True, nargs="?",
+        help="wether to use more important transformations (resize, shift, rotate)")
     
     args = parser.parse_args()
     print(f"\n> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
-    main(args.dataset, args.n_trials, args.print_every_k_batches, args.train_size, args.mode)
+    main(args.dataset, args.n_trials, args.print_every_k_batches, args.train_size, args.mode, args.rsr)
