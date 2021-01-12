@@ -1,13 +1,15 @@
 from PIL import Image, ImageOps
 import random as rd
 import numpy as np
+from .image_transformer_old import ImageTransformerRSR
 
 class ImageTransformer():
-    def __init__(self, width, max_height_ratio=0.4, max_width_ratio=0.15, random_state=0):
+    def __init__(self, width, max_height_ratio=0.4, max_width_ratio=0.15, random_state=0, rsr=True):
         self.w = width
         self.max_height_ratio = max_height_ratio
         self.max_width_ratio = max_width_ratio
         rd.seed(random_state)
+        self.rsr = rsr
         
     def find_coeffs(self, pa, pb):
         matrix = []
@@ -28,8 +30,11 @@ class ImageTransformer():
             img = ImageOps.invert(img).convert('L')
             self.h = img.size[1]
             self.images[filename] = img.crop((0, 0, self.w, self.h))
+
+        if self.rsr:
+            self.image_transformer_rsr = ImageTransformerRSR(width=self.w, height=self.h)
         
-    def transform(self, img):
+    def transform_perspective(self, img):
         side = rd.randint(1,4)
         
         if side % 2 == 0:
@@ -47,7 +52,13 @@ class ImageTransformer():
             else:
                 pa = [(0, 0), (start_w, self.h), (self.w, 0), (start_w + self.w - perspective_delta, self.h)]
         coeffs = self.find_coeffs(pa, [(0, 0), (0, self.h), (self.w, 0), (self.w, self.h)])
-        return np.array(img.transform((self.w, self.h), Image.PERSPECTIVE, coeffs, Image.BICUBIC))
+        return img.transform((self.w, self.h), Image.PERSPECTIVE, coeffs, Image.BICUBIC)
+    
+    def transform(self,img):
+        if self.rsr:
+            return self.image_transformer_rsr(self.transform_perspective(img))
+        else:
+            return self.transform_perspective(img)
 
     def __call__(self, filename):
-        return self.transform(self.images[filename])[np.newaxis,:,:]
+        return np.array(self.transform(self.images[filename]))[np.newaxis,:,:]

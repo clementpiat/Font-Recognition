@@ -83,15 +83,15 @@ def train_and_eval(width, height, device, learning_rate, epochs, train_loader, t
     print(f"\n> Test accuracy: {accuracy}")
     return accuracy
 
-def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate, mode):
-    np.random.seed(0)
-    rd.seed(0)
-    torch.manual_seed(0)
+def main(batch_size, epochs, train_size, dataset, print_every_k_batches, n_transformations, learning_rate, mode, random_seed, rsr):
+    np.random.seed(random_seed)
+    rd.seed(random_seed)
+    torch.manual_seed(random_seed)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("Device:",device)
 
-    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, n_transformations, siamese=True)
+    train_dataset, test_dataset = get_train_test_dataset(dataset, train_size, n_transformations, siamese=True, rsr=rsr)
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -120,7 +120,12 @@ if __name__ == "__main__":
         help="training learning rate")
     parser.add_argument("-m", "--mode", type=int, default=0, 
         help="type of model: 0, 1, or 2")
+    parser.add_argument("-rs", "--random_seed", type=int, default=0, 
+        help="random seed")
+    parser.add_argument("-rsr", "--rsr", type=bool, default=False, const=True, nargs="?",
+        help="wether to use more important transformations (resize, shift, rotate)")
     args = parser.parse_args()
     print(f"\n> args:\n{json.dumps(vars(args), sort_keys=True, indent=4)}\n")
     
-    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches, args.n_transformations, args.learning_rate, args.mode)
+    main(args.batch_size, args.epochs, args.train_size, args.dataset, args.print_every_k_batches, args.n_transformations, args.learning_rate, args.mode, 
+        args.random_seed, args.rsr)

@@ -54,7 +54,7 @@ class FontDataset(Dataset):
     def get_img_label(self, index):
         return (self.it(self.filenames[index]), self.font_to_label[self.fonts[index]])
 
-def get_train_test_dataset(dataset_name, train_size, n_transformations, siamese=False, random_state=0, width=512, max_height_ratio=0.4, max_width_ratio=0.15):
+def get_train_test_dataset(dataset_name, train_size, n_transformations, siamese=False, random_state=0, width=512, max_height_ratio=0.4, max_width_ratio=0.15, rsr=False):
     fonts = os.listdir(os.path.join("data", dataset_name))
     font_to_filenames_train, font_to_filenames_test, paths_filenames = {}, {}, []
     for font in fonts:
@@ -68,7 +68,7 @@ def get_train_test_dataset(dataset_name, train_size, n_transformations, siamese=
 
     font_to_label = { font: i for i,font in enumerate(font_to_filenames_train) }
 
-    it = ImageTransformer(random_state=random_state, width=width, max_width_ratio=max_width_ratio, max_height_ratio=max_height_ratio)
+    it = ImageTransformer(random_state=random_state, width=width, max_width_ratio=max_width_ratio, max_height_ratio=max_height_ratio, rsr=rsr)
     it.load_and_crop(paths_filenames)
     
     train_dataset = FontDataset(dataset_name, font_to_label, font_to_filenames_train, it, n_transformations, siamese=siamese)

@@ -2,8 +2,8 @@ from PIL import Image
 import random as rd
 import numpy as np
 
-class ImageTransformer():
-    def __init__(self, width=512, height=64, random_state=0, translation_ratio=0.05):
+class ImageTransformerRSR():
+    def __init__(self, width=512, height=64, random_state=0, translation_ratio_x=0.7, translation_ratio_y=0.2):
         """
         square_dim: dimension of the final square image (number of pixels)
         """
@@ -11,7 +11,8 @@ class ImageTransformer():
         self.height = height
         self.random_state = random_state
         rd.seed(random_state)
-        self.translation_ratio = translation_ratio
+        self.translation_ratio_x = translation_ratio_x
+        self.translation_ratio_y = translation_ratio_y
 
     def set_random_transformation_parameters(self):
         """
@@ -19,21 +20,18 @@ class ImageTransformer():
         size: proportion of the text in the final image (float between 0.5 and 1)
         proportion_w, proportion_h: location of the text in the final image (couple of floats between 0 and 1)
         """
-        self.angle = rd.randint(-2,2)
-        self.resize_factor = rd.uniform(0.8,1.2)
-        self.translation_x = rd.random()*self.width*self.translation_ratio
-        self.translation_y = rd.random()*self.height*self.translation_ratio
+        self.angle = rd.randint(-4,4)
+        self.resize_factor = rd.uniform(0.6,1.2)
+        self.translation_x = (rd.random()*2 -1)*self.width*self.translation_ratio_x
+        self.translation_y = (rd.random()*2 -1)*self.height*self.translation_ratio_y
 
-    def sentence_to_image(self, path_to_sentence):
+    def __call__(self, img):
         """
-        Being given the path to a font image returns a rotated, shifted and resized image
+        Being given a PIL image returns a rotated, shifted and resized image
         """
         self.set_random_transformation_parameters()
-
-        img = Image.open(path_to_sentence, 'r')
-
         # Rotate
-        img = img.rotate(self.angle, expand=True, fillcolor='white')
+        img = img.rotate(self.angle, expand=True, fillcolor='black')
 
         # Resize
         img_w, img_h = img.size
@@ -41,7 +39,7 @@ class ImageTransformer():
         img = img.resize(new_shape)
 
         # Place it somewhere in a bigger white image
-        background = Image.new('L', (self.width, self.height) , 255)
+        background = Image.new('L', (self.width, self.height) , 0)
         offset = (int(self.translation_x), int(self.translation_y))
         background.paste(img, offset)
-        return np.array(background)[np.newaxis,:,:]
+        return background
