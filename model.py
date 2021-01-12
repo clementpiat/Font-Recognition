@@ -8,20 +8,20 @@ def init_weights(m):
             torch.nn.init.zeros_(m.bias)
 
 class Model(nn.Module):
-    def __init__(self, width, height, max_pooling=[1,(2,3),(2,3),(2,3)], mode=0):
+    def __init__(self, width, height, mode=0, conv_filters=[32,32,64,64], max_pooling=(2,3),kernel=3):
         super(Model, self).__init__()
-        
-        self.conv = nn.Sequential(
-            nn.Conv2d(1,32,3),
-            nn.MaxPool2d(max_pooling[0]),
-            nn.Conv2d(32,32,3),
-            nn.MaxPool2d(max_pooling[1]),
-            nn.Dropout(inplace=True),
-            nn.Conv2d(32,64,3),
-            nn.MaxPool2d(max_pooling[2]),
-            nn.Conv2d(64,64,3),
-            nn.MaxPool2d(max_pooling[3])
-        )
+
+        conv_filters.insert(0,1)
+        n = len(conv_filters)
+        i, prev_filter_size, conv_layers = 1, 1, []
+        while(i<n):
+            conv_layers.append(nn.Conv2d(conv_filters[i-1],conv_filters[i],kernel))
+            i+=1
+            if(i%2==1 or i==n):
+                conv_layers.append(nn.MaxPool2d(max_pooling))
+
+
+        self.conv = nn.Sequential(*conv_layers)
         self.conv.apply(init_weights)
 
         self.d_conv = torch.flatten(self.conv(torch.zeros(1,1,height,width))).size()[0]

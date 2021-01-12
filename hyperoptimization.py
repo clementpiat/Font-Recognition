@@ -19,6 +19,10 @@ def main(dataset, n_trials, print_every_k_batches, train_size, mode, rsr):
         n_transformations = trial.suggest_int('n_transformations', 1, 4)
         epochs = trial.suggest_int('epochs', 5, 50)
         learning_rate = trial.suggest_loguniform('learning_rate', 1e-4, 1e-2)
+        n_conv = trial.suggest_int('n_conv', 2, 6) # Number of convolutional layers
+        conv_filters = [trial.suggest_int(f'conv_filters_{i}', 4, 64) for i in range(n_conv)]
+        kernel = trial.suggest_int('kernel', 3, 5)
+        max_pooling_x = trial.suggest_categorical('max_pooling_x', [2, 4])
 
         train_dataset.n_transformations = n_transformations
         test_dataset.n_transformations = n_transformations
@@ -29,7 +33,7 @@ def main(dataset, n_trials, print_every_k_batches, train_size, mode, rsr):
         img1, _, _, _, _ = next(iter(train_loader))
 
         return -train_and_eval(img1.shape[3], img1.shape[2], device, learning_rate, epochs, train_loader, test_loader, train_dataset.font_to_label, 
-            print_every_k_batches,mode)
+            print_every_k_batches,mode,conv_filters=conv_filters, max_pooling=(2,max_pooling_x), kernel=kernel)
 
     study = optuna.create_study()
     study.optimize(objective, n_trials=n_trials)

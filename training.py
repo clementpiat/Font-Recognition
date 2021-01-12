@@ -20,8 +20,9 @@ def bce_loss(prediction, label):
 def mse_loss(prediction, label):
     return ((prediction - label)**2).mean()
 
-def train_and_eval(width, height, device, learning_rate, epochs, train_loader, test_loader, font_to_label, print_every_k_batches, mode):
-    model = Model(width, height, mode=mode)
+def train_and_eval(width, height, device, learning_rate, epochs, train_loader, test_loader, font_to_label, print_every_k_batches, mode, 
+                   conv_filters=[32,32,64,64], max_pooling=(2,3),kernel=3):
+    model = Model(width, height, mode=mode, conv_filters=conv_filters, max_pooling=max_pooling, kernel=kernel)
     model.to(device)
     optimizer = Adam(model.parameters(), lr=learning_rate)
         
