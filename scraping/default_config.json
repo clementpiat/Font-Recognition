@@ -1,0 +1,8 @@
+{
+    "data_path": "../data/nasa",
+    "timeout": 2.5,
+    "number_of_sentences_per_font": 100,
+    "fonts_file": "../font_names/fonts_10.json",
+    "dafont_file": "../font_names/dafont_10.json",
+    "style": "Regular 400"
+}

@@ -6,8 +6,12 @@ import os
 from time import time
 from tqdm import tqdm
 
-with open('config.json') as json_file:
-    config = json.load(json_file)
+try:
+    with open('config.json') as json_file:
+        config = json.load(json_file)
+except:
+    with open('default_config.json') as json_file:
+        config = json.load(json_file)
 
 with open(config["dafont_file"]) as json_file:
     fonts = json.load(json_file)

@@ -7,6 +7,9 @@
 !/data/example
 !/data/nasa
 
+/test_scenario/dop
+/test_scenario/roc_curves
+
 # python
 __pycache__
 .ipynb_checkpoints

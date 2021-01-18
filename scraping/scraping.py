@@ -10,8 +10,12 @@ from time import time, sleep
 import os
 from tqdm import tqdm
 
-with open('config.json') as json_file:
-    config = json.load(json_file)
+try:
+    with open('config.json') as json_file:
+        config = json.load(json_file)
+except:
+    with open('default_config.json') as json_file:
+        config = json.load(json_file)
 
 with open(config["fonts_file"]) as json_file:
     fonts = json.load(json_file)
