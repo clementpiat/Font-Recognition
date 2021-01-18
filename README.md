@@ -2,7 +2,7 @@
 
 > CentraleSupélec Deep Learning Project
 
-Font identification using a CNNs siamese network.
+Font identification using a siamese CNNs.
 
 ### Features
 
