@@ -16,6 +16,7 @@ class Model(nn.Module):
         i, prev_filter_size, conv_layers = 1, 1, []
         while(i<n):
             conv_layers.append(nn.Conv2d(conv_filters[i-1],conv_filters[i],kernel))
+            conv_layers.append(nn.ReLU(inplace=True))
             i+=1
             if(i%2==1 or i==n):
                 conv_layers.append(nn.MaxPool2d(max_pooling))
