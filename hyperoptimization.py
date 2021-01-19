@@ -18,7 +18,7 @@ def main(dataset, n_trials, print_every_k_batches, train_size, mode, rsr):
         batch_size = trial.suggest_categorical('batch_size', [32, 64, 128])
         n_transformations = trial.suggest_int('n_transformations', 1, 4)
         epochs = trial.suggest_int('epochs', 5, 50)
-        learning_rate = trial.suggest_loguniform('learning_rate', 1e-4, 1e-2)
+        learning_rate = trial.suggest_loguniform('learning_rate', 1e-6, 1)
         n_conv = trial.suggest_int('n_conv', 2, 6) # Number of convolutional layers
         conv_filters = [trial.suggest_int(f'conv_filters_{i}', 4, 64) for i in range(n_conv)]
         kernel = trial.suggest_int('kernel', 3, 5)
