@@ -4,6 +4,10 @@
 
 Font identification using a siamese CNNs.
 
+### The Task
+
+![Task](https://github.com/clementpiat/Font-Recognition/blob/master/task.png)
+
 ### Features
 
 - Creation of a font dataset by scraping Google Fonts and Dafont.
